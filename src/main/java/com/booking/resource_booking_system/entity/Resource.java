@@ -1,34 +1,32 @@
 package com.booking.resource_booking_system.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "resources")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Resource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
     private boolean available;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "resource")
-    @Builder.Default
-    private List<Reservation> reservations = new ArrayList<>();
+    private List<Reservation> reservations;
 }

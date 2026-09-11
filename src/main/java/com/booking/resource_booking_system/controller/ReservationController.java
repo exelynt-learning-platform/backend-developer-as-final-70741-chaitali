@@ -15,7 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+import java.math.BigDecimal;
+import com.booking.resource_booking_system.entity.Status;
 @RestController
 @RequestMapping("/reservations")
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Reservation> createReservation(
             @Valid @RequestBody ReservationRequest request,
             Authentication authentication) {
@@ -41,6 +42,9 @@ public class ReservationController {
     @GetMapping
     public ResponseEntity<Page<Reservation>> getReservations(
             Authentication authentication,
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -56,15 +60,13 @@ public class ReservationController {
                 .stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        if (isAdmin) {
-            return ResponseEntity.ok(
-                    reservationService.getAllReservations(pageable)
-            );
-        }
-
         return ResponseEntity.ok(
-                reservationService.getUserReservations(
+                reservationService.getReservations(
                         authentication.getName(),
+                        isAdmin,
+                        status,
+                        minPrice,
+                        maxPrice,
                         pageable
                 )
         );

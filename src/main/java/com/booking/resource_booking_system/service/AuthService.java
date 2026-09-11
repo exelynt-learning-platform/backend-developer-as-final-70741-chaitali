@@ -33,6 +33,6 @@ public class AuthService {
 
         String token = jwtService.generateToken(user.getUsername());
 
-        return new LoginResponse(token);
+        return new LoginResponse(token, user.getRole().name());
     }
 }

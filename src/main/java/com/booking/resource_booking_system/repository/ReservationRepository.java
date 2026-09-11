@@ -14,4 +14,10 @@ public interface ReservationRepository
     List<Reservation> findByUserUsername(String username);
 
     List<Reservation> findByStatus(Status status);
+
+    boolean existsByResourceIdAndStartTimeLessThanAndEndTimeGreaterThan(
+            Long resourceId,
+            java.time.LocalDateTime endTime,
+            java.time.LocalDateTime startTime
+    );
 }

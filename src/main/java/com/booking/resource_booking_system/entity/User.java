@@ -1,9 +1,9 @@
 package com.booking.resource_booking_system.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -19,20 +19,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Role role;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
-    @Builder.Default
-    private List<Reservation> reservations = new ArrayList<>();
+    private List<Reservation> reservations;
 }

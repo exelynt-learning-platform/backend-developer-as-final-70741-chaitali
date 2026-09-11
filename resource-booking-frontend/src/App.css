@@ -1,0 +1,467 @@
+/* =========================
+   GLOBAL
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f6fb;
+  color: #1f2937;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* =========================
+   APP
+========================= */
+
+.app {
+  min-height: 100vh;
+}
+
+/* =========================
+   LOGIN
+========================= */
+
+.login-card {
+  width: 420px;
+  max-width: 90%;
+  margin: 100px auto;
+  padding: 40px;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.login-card h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 32px;
+  color: #1e293b;
+}
+
+.login-card .subtitle {
+  margin: 10px 0 30px;
+  text-align: center;
+  color: #64748b;
+  font-size: 16px;
+}
+
+.login-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-card label {
+  margin-bottom: 7px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 13px 14px;
+  margin-bottom: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  outline: none;
+  font-size: 15px;
+  transition: 0.2s;
+}
+
+.login-card input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.login-card button {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 9px;
+  background: #4f46e5;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.login-card button:hover {
+  background: #4338ca;
+  transform: translateY(-1px);
+}
+
+.login-card > p:not(.subtitle) {
+  text-align: center;
+  margin-top: 18px;
+  color: #475569;
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+.dashboard {
+  width: 1100px;
+  max-width: 94%;
+  margin: 0 auto;
+  padding: 35px 0 60px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 30px;
+  margin-bottom: 30px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.07);
+}
+
+.dashboard-header > div:first-child {
+  text-align: left;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+  color: #1e293b;
+}
+
+.dashboard-header p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.user-role {
+  padding: 7px 13px;
+  border-radius: 20px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.header-actions button {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #ef4444;
+  color: white;
+  font-weight: 600;
+}
+
+.header-actions button:hover {
+  background: #dc2626;
+}
+
+/* =========================
+   SECTION TITLE
+========================= */
+
+.section-title {
+  margin: 35px 0 18px;
+  font-size: 24px;
+  color: #1e293b;
+}
+
+/* =========================
+   RESERVATION SECTION
+========================= */
+
+.reservation-section {
+  margin-bottom: 30px;
+}
+
+.reservation-section > button {
+  border: none;
+  padding: 12px 20px;
+  border-radius: 9px;
+  background: #4f46e5;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.reservation-section > button:hover {
+  background: #4338ca;
+}
+
+/* =========================
+   RESERVATION LIST
+========================= */
+
+.reservation-list {
+  margin-top: 20px;
+}
+
+.reservation-list h2 {
+  margin-bottom: 18px;
+  font-size: 22px;
+  color: #1e293b;
+}
+
+.reservation-card {
+  background: white;
+  padding: 22px;
+  margin-bottom: 16px;
+  border-radius: 13px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.reservation-card h3 {
+  margin: 0 0 14px;
+  color: #3730a3;
+  font-size: 19px;
+}
+
+.reservation-card p {
+  margin: 7px 0;
+  color: #475569;
+  font-size: 14px;
+}
+
+/* =========================
+   RESERVATION ACTIONS
+========================= */
+
+.reservation-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.reservation-actions button {
+  border: none;
+  padding: 9px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.reservation-actions button:first-child {
+  background: #4f46e5;
+  color: white;
+}
+
+.reservation-actions button:first-child:hover {
+  background: #4338ca;
+}
+
+.reservation-actions button:last-child {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.reservation-actions button:last-child:hover {
+  background: #fecaca;
+}
+
+/* =========================
+   RESOURCE LIST
+========================= */
+
+.resource-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.resource-card {
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.06);
+  transition: 0.2s;
+}
+
+.resource-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.09);
+}
+
+.resource-card h2 {
+  margin: 0 0 10px;
+  color: #1e293b;
+}
+
+.resource-card p {
+  color: #64748b;
+  margin: 7px 0;
+}
+
+.resource-card button {
+  border: none;
+  padding: 9px 14px;
+  margin: 8px 8px 0 0;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-weight: 600;
+}
+
+.resource-card button:hover {
+  background: #e0e7ff;
+}
+
+/* =========================
+   BOOKING FORM
+========================= */
+
+.booking-form {
+  width: 100%;
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 28px;
+  background: white;
+  border-radius: 15px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+}
+
+.booking-form h2 {
+  margin-top: 0;
+  margin-bottom: 22px;
+  color: #1e293b;
+}
+
+.booking-form label {
+  display: block;
+  margin: 13px 0 7px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.booking-form input,
+.booking-form select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+}
+
+.booking-form input:focus,
+.booking-form select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.booking-form button {
+  border: none;
+  padding: 11px 17px;
+  margin: 20px 8px 0 0;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: white;
+  font-weight: 600;
+}
+
+.booking-form button:hover {
+  background: #4338ca;
+}
+
+.booking-form button:last-child {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.booking-form button:last-child:hover {
+  background: #d1d5db;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 750px) {
+
+  .dashboard {
+    max-width: 92%;
+    padding-top: 20px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    gap: 18px;
+    text-align: center;
+  }
+
+  .dashboard-header > div:first-child {
+    text-align: center;
+  }
+
+  .dashboard-header h1 {
+    font-size: 26px;
+  }
+
+  .header-actions {
+    justify-content: center;
+  }
+
+  .resource-list {
+    grid-template-columns: 1fr;
+  }
+
+  .reservation-actions {
+    flex-direction: column;
+  }
+
+  .reservation-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 500px) {
+
+  .login-card {
+    margin: 50px auto;
+    padding: 28px 22px;
+  }
+
+  .login-card h1 {
+    font-size: 26px;
+  }
+
+  .dashboard-header {
+    padding: 20px;
+  }
+
+  .user-role {
+    font-size: 12px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+  }
+}
