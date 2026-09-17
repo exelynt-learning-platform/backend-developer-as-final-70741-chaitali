@@ -46,7 +46,10 @@ React
 Vite
 JavaScript
 CSS
-Project Structure
+
+# Project Structure
+
+```text
 resource-booking-system/
 │
 ├── src/
@@ -70,4 +73,7 @@ resource-booking-system/
 ├── resource-booking-frontend/
 │
 ├── pom.xml
+├── mvnw
+├── mvnw.cmd
 └── README.md
+```
