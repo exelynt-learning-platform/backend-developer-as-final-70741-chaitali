@@ -35,41 +35,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = authHeader.substring(7);
-        String username;
+        String token = authHeader.substring(7).trim();
 
-        try {
-            username = jwtService.extractUsername(token);
-        } catch (Exception e) {
+        if (token.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (username != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
+        try {
+            String username = jwtService.extractUsername(token);
 
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(username);
+            if (username != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            if (jwtService.isTokenValid(token, username)) {
-                System.out.println("USERNAME: " + userDetails.getUsername());
-                System.out.println("AUTHORITIES: " + userDetails.getAuthorities());
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(username);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                if (jwtService.isTokenValid(token, userDetails.getUsername())) {
 
-                authentication.setDetails(
-                        new WebAuthenticationDetailsSource()
-                                .buildDetails(request)
-                );
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authentication);
+                    authentication.setDetails(
+                            new WebAuthenticationDetailsSource()
+                                    .buildDetails(request)
+                    );
+
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authentication);
+                }
             }
+
+        } catch (Exception e) {
+            // Invalid or expired JWT: leave the request unauthenticated.
+            // Spring Security will handle protected endpoints with 401.
         }
 
         filterChain.doFilter(request, response);

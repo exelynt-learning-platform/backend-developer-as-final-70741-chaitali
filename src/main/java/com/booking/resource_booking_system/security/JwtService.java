@@ -15,18 +15,42 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
+    @Value("${jwt.expiration-ms:86400000}")
+    private long expirationMs;
+
+    @Value("${jwt.issuer:resource-booking-system}")
+    private String issuer;
+
+    @Value("${jwt.audience:resource-booking-api}")
+    private String audience;
+
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(
-                secret.getBytes(StandardCharsets.UTF_8)
-        );
+        byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
+
+        if (secretBytes.length < 32) {
+            throw new IllegalStateException(
+                    "JWT secret must be at least 256 bits (32 bytes)"
+            );
+        }
+
+        return Keys.hmacShaKeyFor(secretBytes);
     }
 
     public String generateToken(String username) {
 
+        Date issuedAt = new Date();
+        Date expiration = new Date(
+                issuedAt.getTime() + expirationMs
+        );
+
         return Jwts.builder()
                 .subject(username)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 86400000))
+                .issuer(issuer)
+                .audience()
+                .add(audience)
+                .and()
+                .issuedAt(issuedAt)
+                .expiration(expiration)
                 .signWith(getSigningKey())
                 .compact();
     }
@@ -35,6 +59,8 @@ public class JwtService {
 
         return Jwts.parser()
                 .verifyWith(getSigningKey())
+                .requireIssuer(issuer)
+                .requireAudience(audience)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
@@ -46,7 +72,8 @@ public class JwtService {
         try {
             String extractedUsername = extractUsername(token);
 
-            return extractedUsername.equals(username);
+            return extractedUsername != null
+                    && extractedUsername.equals(username);
 
         } catch (Exception e) {
             return false;

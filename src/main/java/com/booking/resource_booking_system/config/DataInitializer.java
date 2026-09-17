@@ -4,6 +4,7 @@ import com.booking.resource_booking_system.entity.Role;
 import com.booking.resource_booking_system.entity.User;
 import com.booking.resource_booking_system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,12 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${seed.admin.password}")
+    private String adminPassword;
+
+    @Value("${seed.user.password}")
+    private String userPassword;
+
     @Override
     public void run(String... args) {
 
@@ -23,7 +30,7 @@ public class DataInitializer implements CommandLineRunner {
             User admin = User.builder()
                     .username("admin")
                     .email("admin@example.com")
-                    .password(passwordEncoder.encode("Admin@123"))
+                    .password(passwordEncoder.encode(adminPassword))
                     .role(Role.ADMIN)
                     .build();
 
@@ -35,7 +42,7 @@ public class DataInitializer implements CommandLineRunner {
             User user = User.builder()
                     .username("user")
                     .email("user@example.com")
-                    .password(passwordEncoder.encode("User@123"))
+                    .password(passwordEncoder.encode(userPassword))
                     .role(Role.USER)
                     .build();
 

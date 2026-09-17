@@ -5,6 +5,7 @@ import com.booking.resource_booking_system.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,6 +28,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -36,6 +38,9 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -66,7 +71,10 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                Arrays.stream(allowedOrigins.split(","))
+                        .map(String::trim)
+                        .filter(origin -> !origin.isEmpty())
+                        .toList()
         );
 
         configuration.setAllowedMethods(
@@ -80,7 +88,10 @@ public class SecurityConfig {
         );
 
         configuration.setAllowedHeaders(
-                List.of("*")
+                List.of(
+                        "Authorization",
+                        "Content-Type"
+                )
         );
 
         configuration.setAllowCredentials(true);
@@ -101,52 +112,64 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
-                // Disable CSRF because this is a stateless JWT API
                 .csrf(csrf -> csrf.disable())
 
-                // Enable CORS
                 .cors(cors -> cors.configurationSource(
                         corsConfigurationSource()
                 ))
 
-                // JWT authentication = stateless
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
 
-                // Endpoint authorization
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public endpoints
                         .requestMatchers(
                                 "/auth/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
 
-                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
 
-                // Return 401 when there is no valid authentication
                 .exceptionHandling(ex -> ex
+
                         .authenticationEntryPoint(
-                                (request, response, authException) ->
-                                        response.sendError(
-                                                HttpServletResponse.SC_UNAUTHORIZED,
-                                                "Unauthorized"
-                                        )
+                                (request, response, authException) -> {
+                                    response.setStatus(
+                                            HttpServletResponse.SC_UNAUTHORIZED
+                                    );
+                                    response.setContentType(
+                                            "application/json"
+                                    );
+                                    response.getWriter().write(
+                                            "{\"status\":401,\"message\":\"Unauthorized\"}"
+                                    );
+                                }
+                        )
+
+                        .accessDeniedHandler(
+                                (request, response, accessDeniedException) -> {
+                                    response.setStatus(
+                                            HttpServletResponse.SC_FORBIDDEN
+                                    );
+                                    response.setContentType(
+                                            "application/json"
+                                    );
+                                    response.getWriter().write(
+                                            "{\"status\":403,\"message\":\"Forbidden\"}"
+                                    );
+                                }
                         )
                 )
 
-                // Authentication provider
                 .authenticationProvider(
                         authenticationProvider()
                 )
 
-                // JWT filter runs before username/password filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class

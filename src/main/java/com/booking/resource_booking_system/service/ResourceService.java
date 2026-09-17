@@ -2,6 +2,7 @@ package com.booking.resource_booking_system.service;
 
 import com.booking.resource_booking_system.dto.ResourceRequest;
 import com.booking.resource_booking_system.entity.Resource;
+import com.booking.resource_booking_system.exception.ResourceNotFoundException;
 import com.booking.resource_booking_system.repository.ResourceRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ public class ResourceService {
     public Resource getResourceById(Long id) {
         return resourceRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Resource not found"));
+                        new ResourceNotFoundException("Resource not found"));
     }
 
     public Resource createResource(ResourceRequest request) {
