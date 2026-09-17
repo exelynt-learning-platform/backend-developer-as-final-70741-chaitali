@@ -14,9 +14,7 @@ function App() {
   const [resources, setResources] = useState([])
   const [reservations, setReservations] = useState([])
 
-  const [loggedIn, setLoggedIn] = useState(
-    !!localStorage.getItem('token')
-  )
+  const [loggedIn, setLoggedIn] = useState(false)
 
   const [role, setRole] = useState(
     localStorage.getItem('role') || ''
@@ -76,7 +74,8 @@ function App() {
         setLoggedIn(true)
 
         await getResources(data.token)
-      } else {
+      }
+       else {
         setMessage(
           data.message || 'Login failed ❌'
         )
