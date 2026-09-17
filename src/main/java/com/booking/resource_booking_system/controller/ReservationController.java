@@ -52,6 +52,7 @@ public class ReservationController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Page<Reservation>> getReservations(
             Authentication authentication,
             @RequestParam(required = false) Status status,
@@ -114,6 +115,7 @@ public class ReservationController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Reservation> getReservationById(
             @PathVariable Long id,
             Authentication authentication) {

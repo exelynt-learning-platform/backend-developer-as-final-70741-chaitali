@@ -1,11 +1,12 @@
 package com.booking.resource_booking_system.service;
-import com.booking.resource_booking_system.exception.ConflictException;
+
 import com.booking.resource_booking_system.dto.ReservationRequest;
 import com.booking.resource_booking_system.dto.ReservationUpdateRequest;
 import com.booking.resource_booking_system.entity.Reservation;
 import com.booking.resource_booking_system.entity.Resource;
 import com.booking.resource_booking_system.entity.Status;
 import com.booking.resource_booking_system.entity.User;
+import com.booking.resource_booking_system.exception.ConflictException;
 import com.booking.resource_booking_system.exception.ResourceNotFoundException;
 import com.booking.resource_booking_system.repository.ReservationRepository;
 import com.booking.resource_booking_system.repository.ResourceRepository;
@@ -41,19 +42,21 @@ public class ReservationService {
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
-        Resource resource = resourceRepository.findByIdForUpdate(request.getResourceId())
+        Resource resource = resourceRepository.findByIdForUpdate(
+                        request.getResourceId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Resource not found"));
 
         validateReservationTimes(
                 request.getStartTime(),
-                request.getEndTime()
+                request.getEndTime(),
+                true
         );
 
         if (!resource.isAvailable()) {
-           throw new ConflictException(
-        "Resource is currently unavailable"
-           );
+            throw new ConflictException(
+                    "Resource is currently unavailable"
+            );
         }
 
         boolean alreadyBooked =
@@ -65,9 +68,9 @@ public class ReservationService {
                 );
 
         if (alreadyBooked) {
-           throw new ConflictException(
-           "Resource is already booked for the selected time"
-           );
+            throw new ConflictException(
+                    "Resource is already booked for the selected time"
+            );
         }
 
         Reservation reservation = Reservation.builder()
@@ -171,17 +174,19 @@ public class ReservationService {
 
         Reservation reservation = getReservationById(id);
 
-        validateReservationTimes(
-                request.getStartTime(),
-                request.getEndTime()
-        );
-
         Resource resource = resourceRepository.findByIdForUpdate(
                 reservation.getResource().getId()
         ).orElseThrow(() ->
                 new ResourceNotFoundException("Resource not found"));
 
-        if (!resource.isAvailable()) {
+        validateReservationTimes(
+                request.getStartTime(),
+                request.getEndTime(),
+                false
+        );
+
+        if (!resource.isAvailable()
+                && request.getStatus() != Status.CANCELLED) {
             throw new ConflictException(
                     "Resource is currently unavailable"
             );
@@ -204,7 +209,6 @@ public class ReservationService {
                 throw new ConflictException(
                         "Resource is already booked for the selected time"
                 );
-
             }
         }
 
@@ -225,7 +229,8 @@ public class ReservationService {
 
     private void validateReservationTimes(
             LocalDateTime startTime,
-            LocalDateTime endTime) {
+            LocalDateTime endTime,
+            boolean checkPastTime) {
 
         if (startTime == null || endTime == null) {
             throw new IllegalArgumentException(
@@ -239,7 +244,8 @@ public class ReservationService {
             );
         }
 
-        if (startTime.isBefore(LocalDateTime.now())) {
+        if (checkPastTime
+                && startTime.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException(
                     "Start time cannot be in the past"
             );
