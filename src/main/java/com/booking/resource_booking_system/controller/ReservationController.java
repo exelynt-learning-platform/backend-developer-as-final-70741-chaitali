@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -120,21 +119,18 @@ public class ReservationController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        Reservation reservation =
-                reservationService.getReservationById(id);
-
         boolean isAdmin = authentication.getAuthorities()
                 .stream()
                 .anyMatch(a ->
                         a.getAuthority().equals("ROLE_ADMIN")
                 );
 
-        if (!isAdmin &&
-                !reservation.getUser().getUsername()
-                        .equals(authentication.getName())) {
-
-            throw new AccessDeniedException("Access denied");
-        }
+        Reservation reservation =
+                reservationService.getReservationById(
+                        id,
+                        authentication.getName(),
+                        isAdmin
+                );
 
         return ResponseEntity.ok(reservation);
     }

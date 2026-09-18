@@ -1,53 +1,79 @@
-Resource Booking System
-A secure RESTful Resource Booking System built using Spring Boot, Java, Spring Security, JWT, JPA/Hibernate, and MySQL.
+# Resource Booking System
 
-The system allows authenticated users to view available resources and create reservations, while administrators have full access to manage resources and reservations.
+This is a RESTful Resource Booking System developed using Spring Boot, Java, Spring Security, JWT, JPA/Hibernate, and MySQL.
 
-Assignment
-Assignment Title: Backend Developer Assignment
+The main purpose of this project is to manage resources and their reservations. Users can log in, view available resources, and create reservations. Administrators have additional access to manage resources and reservations.
 
-Deadline: 30th September 2026
+## Assignment
 
-Features
-JWT-based authentication
-BCrypt password encryption
-ADMIN and USER role-based access control
-Secure protected REST APIs
-Resource management
-Reservation management
-Reservation ownership protection
-Reservation status management
-Reservation filtering
-Pagination
-Sorting
-Reservation price using decimal values
-MySQL database integration
-JPA/Hibernate persistence
-Swagger/OpenAPI API documentation
-Seed users for testing
-Validation and error handling
-Technology Stack
-Backend
-Java 21
-Spring Boot 4.1.1
-Spring Web
-Spring Data JPA
-Spring Security
-JWT
-BCrypt
-MySQL
-Hibernate
-Lombok
-Bean Validation
-Swagger / OpenAPI
-Maven
-Frontend
-React
-Vite
-JavaScript
-CSS
+**Assignment Title:** Backend Developer Assignment
 
-# Project Structure
+**Deadline:** 30th September 2026
+
+## Features
+
+The application includes the following features:
+
+- JWT-based login and authentication
+- Password encryption using BCrypt
+- Two user roles: ADMIN and USER
+- Role-based access to APIs
+- Resource management
+- Reservation management
+- Reservation ownership protection
+- Reservation status management
+- Reservation filtering
+- Pagination and sorting
+- Decimal values for reservation prices
+- MySQL database integration
+- JPA/Hibernate for database operations
+- Swagger/OpenAPI documentation
+- Test users created automatically when the application starts
+- Input validation and error handling
+
+## Technology Stack
+
+### Backend
+
+- Java 21
+- Spring Boot 4.1.1
+- Spring Web
+- Spring Data JPA
+- Spring Security
+- JWT
+- BCrypt
+- MySQL
+- Hibernate
+- Lombok
+- Bean Validation
+- Swagger / OpenAPI
+- Maven
+
+## Test Users
+
+Two users are created automatically when the application starts if they do not already exist in the database.
+
+### Admin User
+
+- **Username:** `admin`
+- **Email:** `admin@example.com`
+- **Password:** `Admin@123`
+- **Role:** `ADMIN`
+
+The admin user can manage resources and reservations.
+
+### Normal User
+
+- **Username:** `user`
+- **Email:** `user@example.com`
+- **Password:** `User@123`
+- **Role:** `USER`
+
+The normal user can view resources, create reservations, and view their own reservations.
+
+These accounts are provided for testing the application.
+
+## Project Structure
 
 ```text
 resource-booking-system/
@@ -70,10 +96,7 @@ resource-booking-system/
 │   │
 │   └── test/
 │
-├── resource-booking-frontend/
-│
 ├── pom.xml
 ├── mvnw
 ├── mvnw.cmd
 └── README.md
-```

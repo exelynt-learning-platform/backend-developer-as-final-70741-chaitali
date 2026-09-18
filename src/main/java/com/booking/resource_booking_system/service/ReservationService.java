@@ -6,7 +6,6 @@ import com.booking.resource_booking_system.entity.Reservation;
 import com.booking.resource_booking_system.entity.Resource;
 import com.booking.resource_booking_system.entity.Status;
 import com.booking.resource_booking_system.entity.User;
-import com.booking.resource_booking_system.exception.ConflictException;
 import com.booking.resource_booking_system.exception.ResourceNotFoundException;
 import com.booking.resource_booking_system.repository.ReservationRepository;
 import com.booking.resource_booking_system.repository.ResourceRepository;
@@ -15,23 +14,25 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
 
+    private static final Set<Status> ACTIVE_STATUSES =
+            Set.of(Status.PENDING, Status.CONFIRMED);
+
     private final ReservationRepository reservationRepository;
     private final ResourceRepository resourceRepository;
     private final UserRepository userRepository;
-
-    private static final List<Status> ACTIVE_STATUSES =
-            List.of(Status.PENDING, Status.CONFIRMED);
 
     @Transactional
     public Reservation createReservation(
@@ -42,8 +43,8 @@ public class ReservationService {
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
-        Resource resource = resourceRepository.findByIdForUpdate(
-                        request.getResourceId())
+        Resource resource = resourceRepository
+                .findByIdForUpdate(request.getResourceId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Resource not found"));
 
@@ -54,37 +55,36 @@ public class ReservationService {
         );
 
         if (!resource.isAvailable()) {
-            throw new ConflictException(
-                    "Resource is currently unavailable"
-            );
+            throw new IllegalArgumentException(
+                    "Resource is not available");
         }
 
-        boolean alreadyBooked =
+        boolean overlapping =
                 reservationRepository.existsOverlappingReservation(
                         resource.getId(),
                         request.getStartTime(),
                         request.getEndTime(),
-                        ACTIVE_STATUSES
+                        List.copyOf(ACTIVE_STATUSES)
                 );
 
-        if (alreadyBooked) {
-            throw new ConflictException(
-                    "Resource is already booked for the selected time"
-            );
+        if (overlapping) {
+            throw new IllegalArgumentException(
+                    "Resource is already reserved for the selected time");
         }
 
-        Reservation reservation = Reservation.builder()
-                .user(user)
-                .resource(resource)
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .price(request.getPrice())
-                .status(Status.PENDING)
-                .build();
+        Reservation reservation = new Reservation();
+
+        reservation.setUser(user);
+        reservation.setResource(resource);
+        reservation.setStartTime(request.getStartTime());
+        reservation.setEndTime(request.getEndTime());
+        reservation.setPrice(request.getPrice());
+        reservation.setStatus(Status.PENDING);
 
         return reservationRepository.save(reservation);
     }
 
+    @Transactional(readOnly = true)
     public Page<Reservation> getReservations(
             String username,
             boolean isAdmin,
@@ -95,46 +95,35 @@ public class ReservationService {
 
         if (minPrice != null && maxPrice != null
                 && minPrice.compareTo(maxPrice) > 0) {
+
             throw new IllegalArgumentException(
-                    "minPrice cannot be greater than maxPrice"
-            );
+                    "minPrice must be less than or equal to maxPrice");
         }
 
-        Specification<Reservation> specification =
-                (root, query, criteriaBuilder) ->
-                        criteriaBuilder.conjunction();
+        Specification<Reservation> specification = (root, query, cb) ->
+                cb.conjunction();
 
         if (!isAdmin) {
-
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() ->
-                            new RuntimeException("User not found"));
-
             specification = specification.and(
-                    (root, query, criteriaBuilder) ->
-                            criteriaBuilder.equal(
-                                    root.get("user").get("id"),
-                                    user.getId()
+                    (root, query, cb) ->
+                            cb.equal(
+                                    root.get("user").get("username"),
+                                    username
                             )
             );
         }
 
         if (status != null) {
-
             specification = specification.and(
-                    (root, query, criteriaBuilder) ->
-                            criteriaBuilder.equal(
-                                    root.get("status"),
-                                    status
-                            )
+                    (root, query, cb) ->
+                            cb.equal(root.get("status"), status)
             );
         }
 
         if (minPrice != null) {
-
             specification = specification.and(
-                    (root, query, criteriaBuilder) ->
-                            criteriaBuilder.greaterThanOrEqualTo(
+                    (root, query, cb) ->
+                            cb.greaterThanOrEqualTo(
                                     root.get("price"),
                                     minPrice
                             )
@@ -142,10 +131,9 @@ public class ReservationService {
         }
 
         if (maxPrice != null) {
-
             specification = specification.and(
-                    (root, query, criteriaBuilder) ->
-                            criteriaBuilder.lessThanOrEqualTo(
+                    (root, query, cb) ->
+                            cb.lessThanOrEqualTo(
                                     root.get("price"),
                                     maxPrice
                             )
@@ -158,13 +146,23 @@ public class ReservationService {
         );
     }
 
-    public Reservation getReservationById(Long id) {
+    @Transactional(readOnly = true)
+    public Reservation getReservationById(
+            Long id,
+            String username,
+            boolean isAdmin) {
 
-        return reservationRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Reservation not found"
-                        ));
+        Reservation reservation = getReservationOrThrow(id);
+
+        if (!isAdmin
+                && !reservation.getUser()
+                .getUsername()
+                .equals(username)) {
+
+            throw new AccessDeniedException("Access denied");
+        }
+
+        return reservation;
     }
 
     @Transactional
@@ -172,42 +170,45 @@ public class ReservationService {
             Long id,
             ReservationUpdateRequest request) {
 
-        Reservation reservation = getReservationById(id);
+        Reservation reservation = getReservationOrThrow(id);
 
-        Resource resource = resourceRepository.findByIdForUpdate(
-                reservation.getResource().getId()
-        ).orElseThrow(() ->
-                new ResourceNotFoundException("Resource not found"));
+        Resource resource = resourceRepository
+                .findByIdForUpdate(
+                        reservation.getResource().getId()
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Resource not found"
+                        ));
 
         validateReservationTimes(
                 request.getStartTime(),
                 request.getEndTime(),
-                false
+                true
         );
 
-        if (!resource.isAvailable()
-                && request.getStatus() != Status.CANCELLED) {
-            throw new ConflictException(
-                    "Resource is currently unavailable"
-            );
+        if (request.getStatus() != Status.CANCELLED
+                && !resource.isAvailable()) {
+
+            throw new IllegalArgumentException(
+                    "Resource is not available");
         }
 
-        if (request.getStatus() == Status.PENDING
-                || request.getStatus() == Status.CONFIRMED) {
+        if (ACTIVE_STATUSES.contains(request.getStatus())) {
 
-            boolean alreadyBooked =
+            boolean overlapping =
                     reservationRepository
                             .existsOverlappingReservationExcludingId(
                                     resource.getId(),
                                     reservation.getId(),
                                     request.getStartTime(),
                                     request.getEndTime(),
-                                    ACTIVE_STATUSES
+                                    List.copyOf(ACTIVE_STATUSES)
                             );
 
-            if (alreadyBooked) {
-                throw new ConflictException(
-                        "Resource is already booked for the selected time"
+            if (overlapping) {
+                throw new IllegalArgumentException(
+                        "Resource is already reserved for the selected time"
                 );
             }
         }
@@ -220,11 +221,18 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
-
-        Reservation reservation = getReservationById(id);
-
+        Reservation reservation = getReservationOrThrow(id);
         reservationRepository.delete(reservation);
+    }
+
+    private Reservation getReservationOrThrow(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Reservation not found"
+                        ));
     }
 
     private void validateReservationTimes(
@@ -234,21 +242,19 @@ public class ReservationService {
 
         if (startTime == null || endTime == null) {
             throw new IllegalArgumentException(
-                    "Start time and end time are required"
-            );
+                    "Start time and end time are required");
         }
 
         if (!endTime.isAfter(startTime)) {
             throw new IllegalArgumentException(
-                    "End time must be after start time"
-            );
+                    "End time must be after start time");
         }
 
         if (checkPastTime
                 && startTime.isBefore(LocalDateTime.now())) {
+
             throw new IllegalArgumentException(
-                    "Start time cannot be in the past"
-            );
+                    "Start time cannot be in the past");
         }
     }
 }
