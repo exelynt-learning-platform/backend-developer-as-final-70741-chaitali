@@ -3,6 +3,7 @@ package com.booking.resource_booking_system.service;
 import com.booking.resource_booking_system.dto.LoginRequest;
 import com.booking.resource_booking_system.dto.LoginResponse;
 import com.booking.resource_booking_system.entity.User;
+import com.booking.resource_booking_system.exception.ResourceNotFoundException;
 import com.booking.resource_booking_system.repository.UserRepository;
 import com.booking.resource_booking_system.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +28,18 @@ public class AuthService {
                 )
         );
 
-        User user = userRepository.findByUsername(request.getUsername())
+        User user = userRepository
+                .findByUsername(request.getUsername())
                 .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                        new ResourceNotFoundException(
+                                "User not found"));
 
-        String token = jwtService.generateToken(user.getUsername());
+        String token =
+                jwtService.generateToken(user.getUsername());
 
-        return new LoginResponse(token, user.getRole().name());
+        return new LoginResponse(
+                token,
+                user.getRole().name()
+        );
     }
 }

@@ -20,13 +20,22 @@ public class ResourceController {
     private final ResourceService resourceService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<Resource>> getAllResources() {
-        return ResponseEntity.ok(resourceService.getAllResources());
+
+        return ResponseEntity.ok(
+                resourceService.getAllResources()
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Resource> getResourceById(@PathVariable Long id) {
-        return ResponseEntity.ok(resourceService.getResourceById(id));
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Resource> getResourceById(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                resourceService.getResourceById(id)
+        );
     }
 
     @PostMapping
@@ -51,7 +60,8 @@ public class ResourceController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteResource(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteResource(
+            @PathVariable Long id) {
 
         resourceService.deleteResource(id);
 

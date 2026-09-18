@@ -41,10 +41,11 @@ public class ReservationController {
             @Valid @RequestBody ReservationRequest request,
             Authentication authentication) {
 
-        Reservation reservation = reservationService.createReservation(
-                request,
-                authentication.getName()
-        );
+        Reservation reservation =
+                reservationService.createReservation(
+                        request,
+                        authentication.getName()
+                );
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reservation);
@@ -93,12 +94,14 @@ public class ReservationController {
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable =
+                PageRequest.of(page, size, sort);
 
         boolean isAdmin = authentication.getAuthorities()
                 .stream()
-                .anyMatch(a ->
-                        a.getAuthority().equals("ROLE_ADMIN")
+                .anyMatch(authority ->
+                        authority.getAuthority()
+                                .equals("ROLE_ADMIN")
                 );
 
         return ResponseEntity.ok(
@@ -121,8 +124,9 @@ public class ReservationController {
 
         boolean isAdmin = authentication.getAuthorities()
                 .stream()
-                .anyMatch(a ->
-                        a.getAuthority().equals("ROLE_ADMIN")
+                .anyMatch(authority ->
+                        authority.getAuthority()
+                                .equals("ROLE_ADMIN")
                 );
 
         Reservation reservation =
@@ -142,7 +146,10 @@ public class ReservationController {
             @Valid @RequestBody ReservationUpdateRequest request) {
 
         return ResponseEntity.ok(
-                reservationService.updateReservation(id, request)
+                reservationService.updateReservation(
+                        id,
+                        request
+                )
         );
     }
 
